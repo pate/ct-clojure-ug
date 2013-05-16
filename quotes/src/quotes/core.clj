@@ -2,6 +2,7 @@
   (:gen-class)
   (:require [ring.server.standalone :refer [serve]]
             [compojure.handler :refer [site]]
+            [ring.middleware.file-info :refer [wrap-file-info]]
             [ring.middleware.resource :refer [wrap-resource]]
             [compojure.core :refer [defroutes GET POST]]
             [hiccup.core :refer [html]]
@@ -67,7 +68,8 @@
 (def handler
   (-> #'routes
       site
-      (wrap-resource "public")))
+      (wrap-resource "public")
+      (wrap-file-info)))
 
 (defonce server-process (atom nil))
 
