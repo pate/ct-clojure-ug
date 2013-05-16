@@ -13,56 +13,51 @@
   [content]
   (h/html
    [:html
-    [:head]
+    [:head
+     [:link {:rel "stylesheet" :href "/bootstrap/css/bootstrap.min.css"}]
+     [:style "
+img { width: 50px; height: 50px; margin: 0 0.5em; }
+.row-fluid {margin-top: 2em;}
+.quote { margin: 1em 0;  font-size: 1.6em; font-family: serif; }"]]
     [:body
-     [:p
-      [:a {:href "/quotes"} "Quotes"]
-      " "
-      [:a {:href "/add-quote"} "Add quote"]]
-     content]]))
+     [:div.container-fluid
+      [:div.row-fluid
+       [:div.btn-group
+        [:a.btn {:href "/"} "Quotes"]
+        [:a.btn {:href "/add-quote"} "Add quote"]]]
+      [:div.row-fluid content]]]]))
 
 (defn home
   []
-  (layout [:h1 "Hello, Cape Town!"]))
+  (layout
+   (for [{:keys [content author image]} @quotes]
+     [:blockquote
+      [:p.quote "&ldquo;" content "&rdquo;"]
+      [:p
+       (when image
+         [:img {:src (str "/images/" image)}])
+       author]])))
 
 (defn add-quote-form
   []
   (layout
    [:form {:action "/add-quote" :method "POST"}
-    [:div
-     [:label {:for "content"} "Quote"]]
-    [:div
-     [:textarea {:id "content" :name "content" :rows 4 :cols 50}]]
-    [:div
-     [:label {:for "author"} "Author"]]
-    [:div
-     [:input {:id "author" :name "author" :type "text"}]]
-    [:div
-     [:label {:for "image"} "Author picture url"]]
-    [:div
-     [:input {:id "image" :name "image" :type "text"}]]
-    [:button "Save"]]))
+    [:fieldset [:legend "Add Quote"]
+     [:label {:for "content"} "Quote"]
+     [:textarea.input-xlarge {:id "content" :name "content"}]
+     [:label {:for "author"} "Author"]
+     [:input.input-xlarge {:id "author" :name "author" :type "text"}]
+     [:label {:for "image"} "Author picture file name"]
+     [:input.input-xlarge {:id "image" :name "image" :type "text"}]]
+    [:button.btn-primary {:type "Submit"} "Save"]]))
 
 (defn process-quote-form
   [{:keys [content author image]}]
   (add-quote content author image)
-  (response/redirect "/quotes"))
-
-(defn view-quotes
-  []
-  (layout
-   (for [{:keys [content author image]} @quotes]
-     (list [:blockquote
-            [:p content]
-            [:p
-             (when image
-               (list [:img {:src (str "/images/" image)}]
-                     " "))
-             author]]))))
+  (response/redirect "/"))
 
 (defroutes routes
   (GET "/" [] (home))
-  (GET "/quotes" [] (view-quotes))
   (GET "/add-quote" [] (add-quote-form))
   (POST "/add-quote" {params :params} (process-quote-form params)))
 
