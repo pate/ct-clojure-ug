@@ -19,16 +19,12 @@
    [:html
     [:head
      [:link {:rel "stylesheet" :href "/bootstrap/css/bootstrap.min.css"}]
-     [:style "
-img { width: 50px; height: 50px; margin: 0 0.5em; }
-.row-fluid {margin-top: 2em;}
-.quote { margin: 1em 0;  font-size: 1.6em; font-family: serif; }"]]
+     [:link {:rel "stylesheet" :href "/css/style.css"}]]
     [:body
      [:div.container-fluid
       [:div.row-fluid
-       [:div.btn-group
-        [:a.btn {:href "/"} "Quotes"]
-        [:a.btn {:href "/add-quote"} "Add quote"]]]
+       [:a.btn {:href "/"} "Quotes"]
+       [:a.btn {:href "/add-quote"} "Add quote"]]
       [:div.row-fluid content]]]]))
 
 (defn render-quote
