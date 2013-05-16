@@ -25,7 +25,8 @@
       [:div.row-fluid
        [:a.btn {:href "/"} "Quotes"]
        [:a.btn {:href "/add-quote"} "Add quote"]]
-      [:div.row-fluid content]]]]))
+      [:div.row-fluid content]]
+     [:script {:src "/js/debug.js"}]]]))
 
 (defn render-quote
   [{:keys [content author image]}]
