@@ -23,14 +23,6 @@
   (stop-server!)
   (reset! server-process (serve handler {:port 3000 :open-browser? false :join? false})))
 
-(defn restart-server!
-  []
-  (stop-server!)
-  (start-server!))
-
 (defn -main
-  "I don't do a whole lot ... yet."
   [& args]
-  ;; work around dangerous default behaviour in Clojure
-  (alter-var-root #'*read-eval* (constantly false))
   (start-server!))
