@@ -1,10 +1,14 @@
 (ns quotes.core
   (:gen-class)
   (:require [ring.server.standalone :refer [serve]]
+            [compojure.handler :as handler]
+            [ring.middleware.resource :refer [wrap-resource]]
             [quotes.views :as v]))
 
 (def handler
-  v/routes)
+  (-> #'v/routes
+      handler/site
+      (wrap-resource "public")))
 
 (defonce server-process (atom nil))
 
@@ -30,4 +34,3 @@
   ;; work around dangerous default behaviour in Clojure
   (alter-var-root #'*read-eval* (constantly false))
   (start-server!))
-
