@@ -1,7 +1,7 @@
 (ns quotes.core
   (:gen-class)
   (:require [ring.server.standalone :refer [serve]]
-            [compojure.handler :as handler]
+            [compojure.handler :refer [site]]
             [ring.middleware.resource :refer [wrap-resource]]
             [compojure.core :refer [defroutes GET POST]]
             [hiccup.core :refer [html]]
@@ -69,7 +69,7 @@ img { width: 50px; height: 50px; margin: 0 0.5em; }
 
 (def handler
   (-> #'routes
-      handler/site
+      site
       (wrap-resource "public")))
 
 (defonce server-process (atom nil))
