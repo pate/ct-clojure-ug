@@ -92,13 +92,6 @@
        (map first)
        (map entity)))
 
-(defn get-quotes-by-tag
-  [tag]
-  (-> (d/q '[:find ?t :in $ ?s :where [?t :tag ?s]] (db) tag)
-      ffirst
-      entity
-      :quote/_tags))
-
 (defn layout
   [content]
   (html
@@ -137,10 +130,6 @@
 (defn render-quotes
   [quotes]
   (map render-quote quotes))
-
-(defn render-quotes-remote
-  []
-  (html (render-quotes (get-quotes))))
 
 (defn add-quote-form
   []
