@@ -163,7 +163,7 @@
 
 (defn add-quote-form-page
   []
-  (layout add-quote-form))
+  (layout (add-quote-form)))
 
 (defn process-quote-form
   [{:keys [content author image]}]
@@ -184,7 +184,7 @@
 
 (defroutes routes
   (GET "/" {params :params} (home params))
-  (GET "/add-quote" [] (add-quote-form))
+  (GET "/add-quote" [] (add-quote-form-page))
   (POST "/add-quote" {params :params} (process-quote-form params)))
 
 (def handler
