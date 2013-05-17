@@ -6,7 +6,9 @@
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [ring-server "0.2.8"]
                  [hiccup "1.0.1"]
-                 [compojure "1.1.5"]]
+                 [compojure "1.1.5"]
+                 [org.clojure/data.csv "0.1.2"]
+                 [com.datomic/datomic-free "0.8.3952"]]
   :main quotes.core
   :profiles {:dev {:plugins [[lein-cljsbuild "0.3.2"]]}}
   :cljsbuild {:builds
