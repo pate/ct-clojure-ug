@@ -8,7 +8,9 @@
             [hiccup.core :refer [html]]
             [ring.util.response :refer [redirect]]
             [datomic.api :as d]
-            [clojure.string :as string]))
+            [clojure.string :as string]
+            [quotes.views :as v]
+            [quotes.import :as i]))
 
 (def db-uri "datomic:mem://quotes")
 
@@ -101,69 +103,15 @@
 
 (defn layout
   [content]
-  (html
-   [:html
-    [:head
-     [:link {:rel "stylesheet" :href "/bootstrap/css/bootstrap.min.css"}]
-     [:link {:rel "stylesheet" :href "/css/style.css"}]]
-    [:body
-     [:div.container-fluid
-      [:div.row-fluid
-       [:a.btn {:href "/"} "Quotes"]
-       [:a.btn {:href "/add-quote"} "Add quote"]]
-      [:div.row-fluid content]]
-     [:script {:src "/js/debug.js"}]]]))
-
-(defn render-tag
-  [tag]
-  [:a {:href (str "/?search=" tag)} tag])
-
-(defn render-tags
-  [tags]
-  (->> (map :tag tags)
-       shuffle
-       (take 5)
-       (map render-tag)))
-
-(defn render-quote
-  [{:keys [content author image tags] :as quote}]
-  [:blockquote
-   [:p.quote  "&ldquo;" content "&rdquo;"]
-   [:p.tags (render-tags (:quote/tags quote))]
-   [:p
-    [:img {:src (str "/images/" image)}]
-    author]])
-
-(defn render-quotes
-  [quotes]
-  (map render-quote quotes))
+  (html (v/layout content)))
 
 (defn render-quotes-remote
   []
-  (html (render-quotes (get-quotes))))
-
-(defn add-quote-form
-  []
-  [:form {:action "/add-quote" :method "POST"}
-   [:fieldset [:legend "Add Quote"]
-    [:label {:for "content"} "Quote"]
-    [:textarea.input-xlarge {:id "content" :name "content"}]
-    [:label {:for "author"} "Author"]
-    [:input.input-xlarge {:id "author" :name "author" :type "text"}]
-    [:label {:for "image"} "Author picture file name"]
-    [:input.input-xlarge {:id "image" :name "image" :type "text"}]]
-   [:button.btn-primary {:type "submit"} "Save"]])
-
-(defn search-tag-form
-  [search]
-  [:form {:action "/" :method "GET"}
-   [:fieldset [:legend "Search tags"]
-    [:input.input-xlarge {:name "search" :type "text" :value search}]]
-   [:button.btn-primary {:type "submit"} "Search"]])
+  (html (v/render-quotes (get-quotes))))
 
 (defn add-quote-form-page
   []
-  (layout (add-quote-form)))
+  (layout (v/add-quote-form)))
 
 (defn process-quote-form
   [{:keys [content author image]}]
@@ -174,13 +122,14 @@
   [{:keys [search]}]
   (layout
    (list
-    (search-tag-form search)
-    (render-quotes (if search
-                     (->> (search-tags search)
-                          (map :quote/_tags)
-                          (mapcat identity)
-                          (shuffle))
-                     (get-quotes))))))
+    (v/search-tag-form search)
+    (v/render-quotes
+     (if search
+       (->> (search-tags search)
+            (map :quote/_tags)
+            (mapcat identity)
+            (shuffle))
+       (get-quotes))))))
 
 (defroutes routes
   (GET "/" {params :params} (home params))
@@ -204,8 +153,10 @@
 (defn start-server!
   []
   (stop-server!)
+  (transact-schema)
   (reset! server-process (serve handler {:port 3000 :open-browser? false :join? false})))
 
 (defn -main
   [& args]
-  (start-server!))
+  (start-server!)
+  (transact (i/import-quotes)))
