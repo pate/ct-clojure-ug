@@ -94,13 +94,6 @@
        (map first)
        (map entity)))
 
-(defn get-quotes-by-tag
-  [tag]
-  (-> (d/q '[:find ?t :in $ ?s :where [?t :tag ?s]] (db) tag)
-      ffirst
-      entity
-      :quote/_tags))
-
 (defn layout
   [content]
   (html (v/layout content)))
