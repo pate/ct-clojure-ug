@@ -7,7 +7,8 @@
             [compojure.core :refer [defroutes GET POST]]
             [hiccup.core :refer [html]]
             [ring.util.response :refer [redirect]]
-            [datomic.api :as d]))
+            [datomic.api :as d]
+            [clojure.string :as string]))
 
 (def db-uri "datomic:mem://quotes")
 
@@ -113,21 +114,33 @@
       [:div.row-fluid content]]
      [:script {:src "/js/debug.js"}]]]))
 
+(defn render-tag
+  [tag]
+  [:a {:href (str "/?search=" tag)} tag])
+
+(defn render-tags
+  [tags]
+  (->> (map :tag tags)
+       shuffle
+       (take 5)
+       (map render-tag)))
+
 (defn render-quote
-  [{:keys [content author image]}]
+  [{:keys [content author image tags] :as quote}]
   [:blockquote
    [:p.quote  "&ldquo;" content "&rdquo;"]
+   [:p.tags (render-tags (:quote/tags quote))]
    [:p
     [:img {:src (str "/images/" image)}]
     author]])
 
 (defn render-quotes
-  []
-  (map render-quote (get-quotes)))
+  [quotes]
+  (map render-quote quotes))
 
 (defn render-quotes-remote
   []
-  (html (render-quotes)))
+  (html (render-quotes (get-quotes))))
 
 (defn add-quote-form
   []
@@ -139,7 +152,14 @@
     [:input.input-xlarge {:id "author" :name "author" :type "text"}]
     [:label {:for "image"} "Author picture file name"]
     [:input.input-xlarge {:id "image" :name "image" :type "text"}]]
-   [:button.btn-primary {:type "Submit"} "Save"]])
+   [:button.btn-primary {:type "submit"} "Save"]])
+
+(defn search-tag-form
+  [search]
+  [:form {:action "/" :method "GET"}
+   [:fieldset [:legend "Search tags"]
+    [:input.input-xlarge {:name "search" :type "text" :value search}]]
+   [:button.btn-primary {:type "submit"} "Search"]])
 
 (defn add-quote-form-page
   []
@@ -151,12 +171,19 @@
   (redirect "/"))
 
 (defn home
-  []
+  [{:keys [search]}]
   (layout
-   (render-quotes)))
+   (list
+    (search-tag-form search)
+    (render-quotes (if search
+                     (->> (search-tags search)
+                          (map :quote/_tags)
+                          (mapcat identity)
+                          (shuffle))
+                     (get-quotes))))))
 
 (defroutes routes
-  (GET "/" [] (home))
+  (GET "/" {params :params} (home params))
   (GET "/add-quote" [] (add-quote-form))
   (POST "/add-quote" {params :params} (process-quote-form params)))
 
